@@ -1,0 +1,124 @@
+Dat=read.table("/Users/ROXANNE/Desktop/Census.txt", header = T)
+Y=Dat$LIFE
+X <- Dat[,c("MALE","BIRTH","DIVO","BEDS","EDUC","INCO")]
+B<-rep(1,51)
+X_new <- cbind(B,X)
+X_new <- data.matrix(X_new)
+colnames(X_new)[1] <- "intercept"
+a<-solve(t(X_new) %*% X_new)
+beta_hat <- a %*% t(X_new) %*% Y; beta_hat
+Y_hat<-X_new %*% beta_hat; Y_hat
+
+#c)
+n=51
+p=6
+s1 <- sum((Y-Y_hat)^2)/n; s1#biased
+s2 <- sum((Y-Y_hat)^2)/(n-p-1); s2 #unbiased
+
+
+
+K<- s2 * a
+diag(K) ^ (1/2)
+
+
+Ybar <- mean(Y)
+SST <- sum((Y-Ybar)^2)
+RSS <- sum((Y-Y_hat)^2)
+R2 <- (1 - (RSS / SST)); R2
+
+#2. 
+
+fit_F<-lm(LIFE~MALE+BIRTH+DIVO+BEDS+EDUC+INCO,data=Dat)
+fit_F
+
+summary(fit_F)
+
+fit_1<- lm(LIFE~BIRTH+BEDS,data=Dat)
+fit_1
+
+
+fit_2<-lm(LIFE~BIRTH+DIVO+BEDS+EDUC,data=Dat)
+anova(fit_2,fit_F)#改名字
+# H0, HA 写出来， F*=3.5642， p-value = 0.03676, p-value > 0.01, 
+# Conclusion: we have no evidence to support H0, we have no evidence to show that at least one of the MALE or INCO has linear relationship with LIFE given other variables constant)
+
+fit_male<-lm(LIFE~MALE, data=Dat)
+anova(fit_male, fit_F)
+fit_birth<-lm(LIFE~BIRTH, data=Dat)
+anova(fit_birth, fit_F)
+fit_divo<-lm(LIFE~DIVO, data=Dat)
+anova(fit_divo, fit_F)
+fit_beds<-lm(LIFE~BEDS, data=Dat)
+anova(fit_beds, fit_F)
+fit_edu<-lm(LIFE~EDUC, data=Dat)
+anova(fit_edu, fit_F)
+fit_inc<-lm(LIFE~INCO, data=Dat)
+anova(fit_inc, fit_F)
+# F* is 7.0963, which means .... 像b问一样
+
+#（g）
+fit_0<-lm(LIFE~1,data=Dat)
+fit_mb<-lm(LIFE~MALE+BIRTH, data=Dat)
+anova(fit_0,fit_mb)
+summary(fit_mb)#与前一行选其一即可
+
+fit_mbd<-lm(LIFE~DIVO+BIRTH+MALE,data=Dat)
+anova(fit_mbd)
+#SSreg 123 = 3.307+8.915+21.424
+
+fit_mbdi<-lm(LIFE~MALE+BIRTH+DIVO+INCO,data=Dat)
+#(I)
+forwdAIC=step(fit_0,scope=list(lower=fit_0,upper=fit_mbdi),direction = "forward")
+
+forwdBIC=step(fit_0,scope=list(lower=fit_0,upper=fit_mbdi),direction = "forward",k=log(n))
+
+backwdAIC=step(fit_mbdi,scope=list(lower=fit_0,upper=fit_mbdi),direction = "backward")
+#adjusted R^2, 或者AIC或者BIC
+
+
+#3. 
+
+stdres=rstandard(fit_F)
+fitted<-fitted.values(fit_F) #y_hat
+plot(fitted,stdres)
+
+lev<-hat(model.matrix(fit_F))
+plot(lev)
+
+cookd<-cooks.distance(fit_F)
+plot(cookd)
+
+plot(Dat$BEDS,stdres)
+points(Dat$BEDS[Dat$STATE=="DC"],stdres[Dat$STATE=="DC"],col="red")
+
+Dat_new<-Dat[Dat$STATE!="DC",]
+fit_F_new<-lm(LIFE~MALE+BIRTH+DIVO+BEDS+EDUC+INCO, data=Dat_new)
+#plot() residuals_new vs fit_new value to see the difference from a
+
+#f)
+plot(Dat$BIRTH,stdres)
+points(Dat$BIRTH[Dat$STATE=="UT"],stdres[Dat$STATE=="UT"],col="red")
+
+plot(Dat$DIVO,stdres)
+points(Dat$DIVO[Dat$STATE=="UT"],stdres[Dat$STATE=="UT"],col="red")
+
+plot(Dat$INCO,stdres)
+points(Dat$INCO[Dat$STATE=="UT"],stdres[Dat$STATE=="UT"],col="red")
+
+plot(Dat$MALE,stdres)
+points(Dat$MALE[Dat$STATE=="UT"],stdres[Dat$STATE=="UT"],col="red")
+
+plot(Dat$BEDS,stdres)
+points(Dat$BEDS[Dat$STATE=="UT"],stdres[Dat$STATE=="UT"],col="red")
+
+plot(Dat$EDUC,stdres)
+points(Dat$EDUC[Dat$STATE=="UT"],stdres[Dat$STATE=="UT"],col="red")
+
+#g)
+stdres=rstandard(fit_F)
+fitted<-fitted.values(fit_F) #y_hat
+plot(fitted.values(fit_full),rstandard(fit_full))
+summary(fit_full)
+
+
+
