@@ -38,9 +38,7 @@ fit_1
 
 
 fit_2<-lm(LIFE~BIRTH+DIVO+BEDS+EDUC,data=Dat)
-anova(fit_2,fit_F)#改名字
-# H0, HA 写出来， F*=3.5642， p-value = 0.03676, p-value > 0.01, 
-# Conclusion: we have no evidence to support H0, we have no evidence to show that at least one of the MALE or INCO has linear relationship with LIFE given other variables constant)
+anova(fit_2,fit_F)
 
 fit_male<-lm(LIFE~MALE, data=Dat)
 anova(fit_male, fit_F)
@@ -54,13 +52,12 @@ fit_edu<-lm(LIFE~EDUC, data=Dat)
 anova(fit_edu, fit_F)
 fit_inc<-lm(LIFE~INCO, data=Dat)
 anova(fit_inc, fit_F)
-# F* is 7.0963, which means .... 像b问一样
+
 
 #（g）
 fit_0<-lm(LIFE~1,data=Dat)
 fit_mb<-lm(LIFE~MALE+BIRTH, data=Dat)
 anova(fit_0,fit_mb)
-summary(fit_mb)#与前一行选其一即可
 
 fit_mbd<-lm(LIFE~DIVO+BIRTH+MALE,data=Dat)
 anova(fit_mbd)
@@ -73,7 +70,7 @@ forwdAIC=step(fit_0,scope=list(lower=fit_0,upper=fit_mbdi),direction = "forward"
 forwdBIC=step(fit_0,scope=list(lower=fit_0,upper=fit_mbdi),direction = "forward",k=log(n))
 
 backwdAIC=step(fit_mbdi,scope=list(lower=fit_0,upper=fit_mbdi),direction = "backward")
-#adjusted R^2, 或者AIC或者BIC
+
 
 
 #3. 
